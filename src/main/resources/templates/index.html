@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Manager | Uploaded Files</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-light: #6366f1;
+            --dark-color: #111827;
+            --gray-dark: #374151;
+            --gray-medium: #6b7280;
+            --gray-light: #e5e7eb;
+            --border-radius: 0.5rem;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            color: var(--dark-color);
+            background-color: #f9fafb;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+
+        .upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .upload-btn:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .file-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.625rem 2.5rem 0.625rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-medium);
+        }
+
+        .file-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .file-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background-color: #f3f4f6;
+            color: var(--gray-dark);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .file-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+            vertical-align: middle;
+        }
+
+        .file-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .file-table tr:hover td {
+            background-color: #f9fafb;
+        }
+
+        .file-icon {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            margin-right: 0.75rem;
+            vertical-align: middle;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .file-name:hover {
+            color: var(--primary-color);
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: white;
+            border: 1px solid var(--gray-light);
+            color: var(--gray-dark);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            background-color: #f3f4f6;
+            color: var(--primary-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--gray-medium);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--gray-light);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--gray-light);
+            color: var(--gray-medium);
+            font-size: 0.875rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow: auto;
+            position: relative;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-medium);
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            color: var(--dark-color);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .file-preview {
+            width: 100%;
+            height: 70vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .file-preview iframe, 
+        .file-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--border-radius);
+        }
+
+        .unsupported-file {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-medium);
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .file-table th, 
+            .file-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .file-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 85vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="page-title">File Manager</h1>
+            <a href="/upload" class="upload-btn">
+                <i class="fas fa-upload"></i>
+                Upload New
+            </a>
+        </header>
+
+        <div class="file-card">
+            <div class="card-header">
+                <h2 class="card-title">Uploaded Files</h2>
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Search files..." id="searchInput">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+            </div>
+
+            <div th:if="${files != null and !files.empty}">
+                <table class="file-table">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="file : ${files}">
+                            <td>
+                                <i class="fas fa-file-alt file-icon"></i>
+                                <span class="file-name" 
+                                      th:text="${file}" 
+                                      th:data-url="@{'/view/' + ${file}}"
+                                      th:data-filename="${file}">
+                                </span>
+                            </td>
+                            <td>
+                                <div class="file-actions">
+                                    <button class="action-btn preview-btn" 
+                                            th:data-url="@{'/view/' + ${file}}"
+                                            th:data-filename="${file}"
+                                            title="Preview">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a th:href="@{'/print/' + ${file}}" 
+                                       class="action-btn" 
+                                       title="Print" 
+                                       target="_blank">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <a th:href="@{'/download/' + ${file}}" 
+                                       class="action-btn" 
+                                       title="Download">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:if="${files == null or files.empty}" class="empty-state">
+                <i class="fas fa-folder-open empty-icon"></i>
+                <h3>No files uploaded yet</h3>
+                <p>Upload your first file by clicking the button above</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2023 File Manager. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal" id="previewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle"></h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="file-preview" id="filePreview">
+                    <!-- Preview content will be inserted here -->
+                </div>
+                <div class="preview-actions">
+                    <a id="printBtn" class="upload-btn" target="_blank">
+                        <i class="fas fa-print"></i> Print
+                    </a>
+                    <a id="downloadBtn" class="upload-btn" style="background-color: var(--gray-dark);">
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            const fileRows = document.querySelectorAll('.file-table tbody tr');
+            
+            if (searchInput && fileRows) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    
+                    fileRows.forEach(row => {
+                        const fileName = row.querySelector('.file-name').textContent.toLowerCase();
+                        if (fileName.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
+            // Modal functionality
+            const modal = document.getElementById('previewModal');
+            const closeModal = document.getElementById('closeModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const filePreview = document.getElementById('filePreview');
+            const printBtn = document.getElementById('printBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const previewButtons = document.querySelectorAll('.preview-btn, .file-name');
+
+            function showPreviewModal(fileUrl, fileName) {
+                modalTitle.textContent = fileName;
+                printBtn.href = fileUrl.replace('/view/', '/print/');
+                downloadBtn.href = fileUrl.replace('/view/', '/download/');
+                
+                // Clear previous preview
+                filePreview.innerHTML = '';
+                
+                // Check file type and display appropriate preview
+                const extension = fileName.split('.').pop().toLowerCase();
+                const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                const pdfExtensions = ['pdf'];
+                const textExtensions = ['txt', 'csv', 'json', 'xml'];
+                const officeExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+                
+                if (imageExtensions.includes(extension)) {
+                    // Image preview
+                    const img = document.createElement('img');
+                    img.src = fileUrl;
+                    img.alt = fileName;
+                    filePreview.appendChild(img);
+                } else if (pdfExtensions.includes(extension)) {
+                    // PDF preview using iframe
+                    const iframe = document.createElement('iframe');
+                    iframe.src = fileUrl;
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    filePreview.appendChild(iframe);
+                } else if (textExtensions.includes(extension)) {
+                    // Text file preview (fetch and display content)
+                    fetch(fileUrl)
+                        .then(response => response.text())
+                        .then(text => {
+                            const pre = document.createElement('pre');
+                            pre.style.whiteSpace = 'pre-wrap';
+                            pre.style.fontFamily = 'monospace';
+                            pre.textContent = text;
+                            filePreview.appendChild(pre);
+                        })
+                        .catch(() => {
+                            showUnsupportedMessage();
+                        });
+                } else if (officeExtensions.includes(extension)) {
+                    // Office files can be previewed using Google Docs viewer
+                    const iframe = document.createElement('iframe');
+                    iframe.src = `https://docs.google.com/gview?url=${encodeURIComponent(window.location.origin + fileUrl)}&embedded=true`;
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    filePreview.appendChild(iframe);
+                } else {
+                    // Unsupported file type
+                    showUnsupportedMessage();
+                }
+                
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function showUnsupportedMessage() {
+                filePreview.innerHTML = `
+                    <div class="unsupported-file">
+                        <i class="fas fa-file-alt" style="font-size: 3rem; color: var(--gray-light); margin-bottom: 1rem;"></i>
+                        <h3>Preview not available</h3>
+                        <p>This file type cannot be previewed directly.</p>
+                    </div>
+                `;
+            }
+
+            function closePreviewModal() {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+                setTimeout(() => {
+                    filePreview.innerHTML = '';
+                }, 300);
+            }
+
+            // Event listeners
+            previewButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const fileUrl = this.getAttribute('data-url') || this.parentElement.getAttribute('data-url');
+                    const fileName = this.getAttribute('data-filename') || this.parentElement.getAttribute('data-filename');
+                    showPreviewModal(fileUrl, fileName);
+                });
+            });
+
+            closeModal.addEventListener('click', closePreviewModal);
+
+            // Close modal when clicking outside content
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closePreviewModal();
+                }
+            });
+
+            // Close modal with ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('show')) {
+                    closePreviewModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

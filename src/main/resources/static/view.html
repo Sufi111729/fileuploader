@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View File</title>
+</head>
+<body>
+    <h2>View File</h2>
+    <!-- For images -->
+    <img id="imageView" src="" alt="Image" style="max-width:100%; display:none;" />
+
+    <!-- For PDFs -->
+    <iframe id="pdfView" src="" width="100%" height="600px" style="display:none;"></iframe>
+
+    <script>
+        // Get file name from URL query parameter
+        const params = new URLSearchParams(window.location.search);
+        const fileName = params.get('file');
+
+        // Determine file type and set src
+        if (fileName) {
+            const ext = fileName.split('.').pop().toLowerCase();
+            if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) {
+                document.getElementById('imageView').src = '/view/' + fileName;
+                document.getElementById('imageView').style.display = 'block';
+            } else if (ext === 'pdf') {
+                document.getElementById('pdfView').src = '/view/' + fileName;
+                document.getElementById('pdfView').style.display = 'block';
+            } else {
+                document.body.innerHTML += '<p>Unsupported file type.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
